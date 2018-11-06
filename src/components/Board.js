@@ -1,13 +1,14 @@
 import { connect } from 'react-redux';
 import React from 'react';
 import BoardRow from './BoardRow';
+import { moveBoard } from '../actions';
 import './Board.scss';
 
 class Board extends React.Component {
 
   componentDidMount() {
     window.addEventListener('keyup', this.handleKeyDown);
-    this.props.dispatch({ type: 'NEW_GAME'});
+    this.createNewGame();
   }
 
   componentWillUnmount() {
@@ -23,35 +24,12 @@ class Board extends React.Component {
     }
 
     if (directions[e.keyCode]) {
-      this.props.dispatch((dispatch, getState) => {
-        const oldBoard = getState().board;
-
-        dispatch({ type: 'MOVE', direction: directions[e.keyCode]});
-        
-        const newBoard = getState().board;
-
-        if (JSON.stringify(newBoard) === JSON.stringify(oldBoard)) {
-
-          let isFull = true;
-          newBoard.forEach((row) => {
-            if (!isFull) {
-              return;
-            }
-            row.forEach((value) => {
-              if (value === 0) {
-                isFull = false;
-              }
-            });
-          });
-
-          if (isFull) {
-            dispatch({ type: 'NEW_GAME' });    
-          }
-        } else {
-          dispatch({ type: 'FILL' });  
-        }
-      });
+      this.props.dispatch(moveBoard(directions[e.keyCode]));
     }
+  }
+
+  createNewGame = () => {
+    this.props.dispatch({ type: 'NEW_GAME'});
   }
   
   render() {
@@ -61,6 +39,10 @@ class Board extends React.Component {
         {board.map((row, i) => { 
           return (<BoardRow key={i} row={row} />) 
         })}
+
+        <div>
+          <button onClick={this.createNewGame}>New Game</button>
+        </div>
       </div>
     )
   }

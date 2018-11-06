@@ -1,11 +1,11 @@
 .BoardCell {
   margin: 2px;
   vertical-align: middle;
-  width: 64px;
-  height: 64px;
+  height: 82px;
   text-align: center;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   background: #9c9c9c;
+  font-size: 30px;
 
   display: flex;
   justify-content: center;

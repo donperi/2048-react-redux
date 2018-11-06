@@ -1,10 +1,15 @@
+import lodashMap from 'lodash/map';
+import lodashClone from 'lodash/map';
+
+const emptyBoard = [
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+];
+
 const initialState = {
-  board: [
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-  ],
+  board: emptyBoard,
   settings: {
     gridSize: 4
   }
@@ -106,13 +111,13 @@ function fillBoard(state) {
   return newBoard;
 }
 
-function getRandomPair(max = 4) {
-  return [
-    Math.floor(Math.random() * max), Math.floor(Math.random() * max)];
-}
-
 function newGame(state) {
-  const newBoard = initialState.board;
+  const newBoard = [
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+  ];
   
   const random1 = getRandomPair();
   let random2 = random1;
@@ -127,8 +132,14 @@ function newGame(state) {
   return newBoard;
 } 
 
+function getRandomPair(max = 4) {
+  return [
+    Math.floor(Math.random() * max), Math.floor(Math.random() * max)];
+}
+
 export default function (state = initialState, action) {
   if (action.type === 'MOVE') {
+    console.log(moveBoard(state, action.direction));
     return {
       ...state,
       board: [
@@ -155,5 +166,5 @@ export default function (state = initialState, action) {
     }
   }
 
-  return state;
+  return { ...state };
 }
