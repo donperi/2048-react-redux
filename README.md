@@ -1,3 +1,9 @@
+# 2048 React + Redux
+
+Simple implementation of 2048 game using React + Redux.
+
+[Demo](https://react-redux-2048-demo.herokuapp.com)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
