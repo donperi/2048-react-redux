@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import React from 'react';
+import Swipeable from 'react-swipeable';
 import BoardRow from './BoardRow';
 import actions from '../actions';
 import './Board.scss';
@@ -48,14 +49,24 @@ class Board extends React.Component {
           <h2>Game Over</h2>
         </div>}
 
-        {board.map((row, i) => { 
-          return (<BoardRow 
-            key={i}
-            rowIndex={i}
-            data={this.props}
-          />) 
-        })}
-
+        <Swipeable
+          onSwipedUp={() => { this.props.dispatch(actions.moveBoard("UP")); }}
+          onSwipedDown={() => { this.props.dispatch(actions.moveBoard("DOWN")); }}
+          onSwipedLeft={() => { this.props.dispatch(actions.moveBoard("LEFT")); }}
+          onSwipedRight={() => { this.props.dispatch(actions.moveBoard("RIGHT")); }}
+        >
+          <div className="Board-content">
+            {board.map((row, i) => { 
+              return (<BoardRow 
+                key={i}
+                rowIndex={i}
+                data={this.props}
+              />) 
+            })}
+          </div>
+        </Swipeable>
+        
+        
         <div>
           <button onClick={this.createNewGame}>New Game</button>
         </div>
