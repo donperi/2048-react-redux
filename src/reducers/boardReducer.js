@@ -1,57 +1,79 @@
-import lodashMap from 'lodash/map';
-import lodashClone from 'lodash/map';
+import Logger from "../Logger";
 
-const emptyBoard = [
-  [0, 0, 0, 0],
-  [0, 0, 0, 0],
-  [0, 0, 0, 0],
-  [0, 0, 0, 0],
+export function createCell(value = 0, is_new = true, merged = false, moved_pos = 0) {
+  return  {
+    value,
+    is_new,
+    merged,
+    moved_pos
+  }
+}
+
+export const createEmptyBoard = () => [
+  [createCell(), createCell(), createCell(), createCell()],
+  [createCell(), createCell(), createCell(), createCell()],
+  [createCell(), createCell(), createCell(), createCell()],
+  [createCell(), createCell(), createCell(), createCell()],
 ];
 
 const initialState = {
-  board: emptyBoard,
+  board: createEmptyBoard(),
+  prev_board: createEmptyBoard(),
+  game_over: false,
+  last_move: null,
   settings: {
     gridSize: 4
   }
 }
 
 export function moveArray(array, reverse) {
-  const originalSize = array.length;
+  let newArray = [...array];
+  
+  const size = newArray.length;
+
   if (reverse) {
-    array.reverse()
+    newArray.reverse()
   }
 
-  array = array.filter((i) => i !== 0);
-  let skip = false;
+  Logger.debug('Initial Array', newArray);
 
-  for (let currentPos = array.length - 1; currentPos >= 0; currentPos--) {
-    let value = array[currentPos];
-    let next = array[currentPos - 1];
-  
-    if (value === next && skip === false) {
-      array = [
-        ...array.slice(0, currentPos-1),
-        value + next,
-        ...array.slice(currentPos+1),
-      ];
-      skip = true;
-    }  else {
-      skip = false;
+  for (let rootPosition = size -1; rootPosition >= 0; rootPosition--) {
+    Logger.debug('Root Position', rootPosition);
+
+    for (let innerPosition = rootPosition; innerPosition <= size - 1; innerPosition++) {
+      Logger.debug('Inner Position', rootPosition);
+
+      let current = newArray[innerPosition];
+      let next = newArray[innerPosition + 1];
+
+      Logger.debug("Current: ", current);
+      Logger.debug("Next: ", next);
+
+      if (next === undefined || current.value === 0) {
+        Logger.debug('Breaking');
+        break;
+      }
+
+      if (next.value === 0 || (next.value === current.value && !current.merged && !next.merged)) {    
+        newArray[innerPosition + 1] = createCell(
+          newArray[innerPosition].value + newArray[innerPosition + 1].value,
+          false,
+          newArray[innerPosition].value === newArray[innerPosition + 1].value,
+          newArray[innerPosition].moved_pos + 1
+        );
+
+        newArray[innerPosition] = createCell();
+
+        Logger.debug('Moved', newArray)
+        }
     }
   }
 
   if (reverse) {
-    array.reverse()
-    return [
-      ...array,
-      ...Array(originalSize - array.length).fill(0)
-    ];
+    newArray.reverse()
   }
 
-  return [
-    ...Array(originalSize - array.length).fill(0),
-    ...array
-  ];
+  return newArray;
 }
 
 function mergeRow(board, index, direction) {
@@ -62,7 +84,7 @@ function mergeRow(board, index, direction) {
 
 function mergeColumn(board, index, direction) {
   let column = board.map((row) => { 
-    return row[index] 
+    return row[index];
   });
 
   const merged = moveArray(column, direction === 'UP');
@@ -73,11 +95,16 @@ function mergeColumn(board, index, direction) {
 }
 
 export function moveBoard(state, direction) {
-  const newBoard = [
-    ...state.board
-  ]
+  const newBoard = [...state.board].map((row, x) => {
+    return row.map((cell, y) => {
+      return createCell(cell.value, false, false);
+    });
+  })
 
-  Array.from(Array(state.settings.gridSize)).forEach((_, i) => {
+  console.log('board');
+  console.log(newBoard);
+
+  Array.from(Array(newBoard.length)).forEach((_, i) => {
     if (['UP', 'DOWN'].indexOf(direction) >= 0) {
       mergeColumn(newBoard, i, direction);
     } else {
@@ -97,7 +124,7 @@ function fillBoard(state) {
   
   Array.from(Array(4)).forEach((_, x) => {
     Array.from(Array(4)).forEach((_, y) => {
-      if (newBoard[x][y] === 0) {
+      if (newBoard[x][y].value === 0) {
         emptyCells.push([x, y]);
       }
     })  
@@ -105,29 +132,24 @@ function fillBoard(state) {
 
   if (emptyCells.length) {
     const random = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-    newBoard[random[0]][random[1]] = [2,4][Math.floor(Math.random() * 2)];
+    newBoard[random[0]][random[1]] = createCell([2,4][Math.floor(Math.random() * 2)], true);
   }
 
   return newBoard;
 }
 
 function newGame(state) {
-  const newBoard = [
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-  ];
+  const newBoard = [...createEmptyBoard()];
   
-  const random1 = getRandomPair();
+  const random1 = getRandomPair(newBoard.length);
   let random2 = random1;
 
   while (JSON.stringify(random1) === JSON.stringify(random2)) {
-    random2 = getRandomPair();
+    random2 = getRandomPair(newBoard.length);
   }
 
-  newBoard[random1[0]][random1[1]] = 2;
-  newBoard[random2[0]][random2[1]] = 2;
+  newBoard[random1[0]][random1[1]] = createCell(2, true);
+  newBoard[random2[0]][random2[1]] = createCell(2, true);
   
   return newBoard;
 } 
@@ -139,9 +161,12 @@ function getRandomPair(max = 4) {
 
 export default function (state = initialState, action) {
   if (action.type === 'MOVE') {
-    console.log(moveBoard(state, action.direction));
     return {
       ...state,
+      last_move: action.direction,
+      prev_board: [
+        ...state.board
+      ],
       board: [
         ...moveBoard(state, action.direction)
       ]
@@ -160,11 +185,22 @@ export default function (state = initialState, action) {
   if (action.type === 'NEW_GAME') {
     return {
       ...state,
+      last_move: null,
+      game_over: false,
+      prev_board: createEmptyBoard(),
       board: [
         ...newGame(state)
       ]
     }
   }
+
+  if (action.type === 'GAME_OVER') {
+    return {
+      ...state,
+      game_over: true,
+    }
+  }
+
 
   return { ...state };
 }

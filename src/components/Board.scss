@@ -4,4 +4,21 @@
   background: hsl(0, 0%, 40%);
   border-radius: 15px;
   padding: 10px;
+
+  position: relative;
+}
+
+.Board-game-over {
+  position: absolute;
+  width: 100%;
+  height: calc(100% - 30px);
+  background: #555b;
+  top: 0;
+  left: 0;
+  border-radius: 15px;
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

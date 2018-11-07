@@ -1,29 +1,24 @@
+import { moveBoard } from "./reducers/boardReducer";
+import BoardUtils from "./lib/BoardUtils";
 
-export const moveBoard = (direction) => (dispatch, getState) => {
-  const oldBoard = getState().board;
+export default {
+  moveBoard: (direction) => (dispatch, getState) => {
+    const oldBoard = getState().board;
 
-  dispatch({ type: 'MOVE', direction});
-  
-  const newBoard = getState().board;
+    dispatch({ type: 'MOVE', direction});
 
-  if (JSON.stringify(newBoard) === JSON.stringify(oldBoard)) {
+    const newBoard =  getState().board;
 
-    let isFull = true;
-    newBoard.forEach((row) => {
-      if (!isFull) {
-        return;
-      }
-      row.forEach((value) => {
-        if (value === 0) {
-          isFull = false;
-        }
-      });
-    });
-
-    if (isFull) {
-      dispatch({ type: 'NEW_GAME' });    
+    if (!BoardUtils.equals(oldBoard, newBoard)) {
+      dispatch({ type: 'FILL' }); 
     }
-  } else {
-    dispatch({ type: 'FILL' });  
+
+    const isGameOver =  BoardUtils.isFull(newBoard) &&
+                        BoardUtils.equals(newBoard, moveBoard({ board: newBoard }, 'UP')) && 
+                        BoardUtils.equals(newBoard, moveBoard({ board: newBoard }, 'RIGHT'));
+    
+    if (isGameOver) {
+      dispatch({ type: 'GAME_OVER' });    
+    }
   }
 }

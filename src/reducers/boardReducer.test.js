@@ -1,4 +1,16 @@
-import boardReducer, { moveArray } from "./boardReducer";
+import boardReducer, { moveArray, createCell } from "./boardReducer";
+
+function arrayToCell(array) {
+  return array.map((value) => {
+    return createCell(value)
+  });
+}
+
+function cellToArray(array) {
+  return array.map((cell) => {
+    return cell.value
+  });
+}
 
 describe('Reducer', () => {
   describe('moveArray', () => {
@@ -10,8 +22,12 @@ describe('Reducer', () => {
       [[4,4,2,2], [8,4,0,0], true],
       [[32,16,8,4], [32,16,8,4], true],
       [[32,16,8,4], [32,16,8,4], false],
+      [[0,0,8,8], [16,0,0,0], true],
+      [[64,32,32,64], [64,64,64,0], true]
     ])("should move the array elements", (input, output, reverse) => {
-        expect(moveArray(input, reverse)).toEqual(output);
+        input = arrayToCell(input);
+
+        expect(cellToArray(moveArray(input, reverse))).toEqual(output);
     })
   })
 
@@ -84,8 +100,8 @@ describe('Reducer', () => {
       };
       
       const beforeState = {
-        board: input,
-        settings: { gridSize: 4 }
+        board: input.map(row => arrayToCell(row)),
+        settings: { gridSize: 4 },
       }
 
       const final = {
@@ -94,6 +110,7 @@ describe('Reducer', () => {
       }
 
       const afterState = boardReducer(beforeState, action);
+      afterState.board = afterState.board.map(row => cellToArray(row));
 
       const actual = afterState;
       const expected = final;
