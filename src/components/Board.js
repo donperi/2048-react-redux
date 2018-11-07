@@ -50,6 +50,8 @@ class Board extends React.Component {
         </div>}
 
         <Swipeable
+          stopPropagation
+          preventDefaultTouchmoveEvent
           onSwipedUp={() => { this.props.dispatch(actions.moveBoard("UP")); }}
           onSwipedDown={() => { this.props.dispatch(actions.moveBoard("DOWN")); }}
           onSwipedLeft={() => { this.props.dispatch(actions.moveBoard("LEFT")); }}

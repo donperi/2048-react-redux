@@ -1,21 +1,30 @@
-import React from 'react';
-
+import React, { useRef, useEffect, useState } from 'react';
 import './BoardCell.scss';
 
 function BoardCell({ rowIndex, cellIndex, data }) {
-  const cell = data.board[rowIndex][cellIndex];
-  let prevCell = null;
-  
-  if (data.prev_board) {
-    prevCell = data.prev_board[rowIndex][cellIndex];
-  }
 
-  if (prevCell) {
-    console.log(prevCell);
-  }
+  const cellRef = useRef();
+  const [ cellHeight, setCellHeight ] = useState(null)
+
+  const cell = data.board[rowIndex][cellIndex];
+
+  useEffect(() => {
+    function handleResize() {
+      if (cellRef.current) {
+        setCellHeight(`${cellRef.current.offsetWidth}px`);
+      }  
+    }
+
+    window.addEventListener('resize', handleResize)
+  
+    return () => { 
+      window.removeEventListener('resize', handleResize)
+    };
+  }, [cellHeight])
+
 
   return (
-    <div className="BoardCell">
+    <div ref={cellRef} style={{ height: cellHeight }} className="BoardCell">
       <span className={`BoardCell-value color-${cell.value}`}>
         {cell.value !== 0 ? cell.value : null }
       </span>
@@ -23,4 +32,4 @@ function BoardCell({ rowIndex, cellIndex, data }) {
   )
 }
 
-export default BoardCell;
+export default React.memo(BoardCell);

@@ -1,6 +1,7 @@
 .Board {
   margin: 0 auto;
-  width: 400px;
+  max-width: 400px;
+  width: 100%;
   background: hsl(0, 0%, 40%);
   border-radius: 15px;
   padding: 10px;
