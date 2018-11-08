@@ -45,10 +45,6 @@ class Board extends React.Component {
 
     return (
       <div className="Board">
-        {game_over && <div className="Board-game-over">
-          <h2>Game Over</h2>
-        </div>}
-
         <Swipeable
           stopPropagation
           preventDefaultTouchmoveEvent
@@ -58,6 +54,10 @@ class Board extends React.Component {
           onSwipedRight={() => { this.props.dispatch(actions.moveBoard("RIGHT")); }}
         >
           <div className="Board-content">
+            {game_over && <div className="Board-game-over">
+              <h2>Game Over</h2>
+            </div>}
+
             {board.map((row, i) => { 
               return (<BoardRow 
                 key={i}

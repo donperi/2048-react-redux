@@ -1,4 +1,6 @@
 import Logger from "../Logger";
+import cloneDeep from 'lodash/cloneDeep';
+import BoardUtils from "../lib/BoardUtils";
 
 export function createCell(value = 0, is_new = true, merged = false, moved_pos = 0) {
   return  {
@@ -76,6 +78,24 @@ export function moveArray(array, reverse) {
   return newArray;
 }
 
+export function moveBoard(state, direction) {
+  const newBoard = cloneDeep(state.board).map((row, x) => {
+    return row.map((cell, y) => {
+      return createCell(cell.value, false, false);
+    });
+  });
+
+  Array.from(Array(newBoard.length)).forEach((_, i) => {
+    if (['UP', 'DOWN'].indexOf(direction) >= 0) {
+      mergeColumn(newBoard, i, direction);
+    } else {
+      mergeRow(newBoard, i, direction);
+    }
+  })
+
+  return newBoard;
+}
+
 function mergeRow(board, index, direction) {
   let row = board[index];
 
@@ -94,31 +114,8 @@ function mergeColumn(board, index, direction) {
   });
 }
 
-export function moveBoard(state, direction) {
-  const newBoard = [...state.board].map((row, x) => {
-    return row.map((cell, y) => {
-      return createCell(cell.value, false, false);
-    });
-  })
-
-  console.log('board');
-  console.log(newBoard);
-
-  Array.from(Array(newBoard.length)).forEach((_, i) => {
-    if (['UP', 'DOWN'].indexOf(direction) >= 0) {
-      mergeColumn(newBoard, i, direction);
-    } else {
-      mergeRow(newBoard, i, direction);
-    }
-  })
-
-  return newBoard;
-}
-
 function fillBoard(state) {
-  const newBoard = [
-    ...state.board
-  ]
+  const newBoard = cloneDeep(state.board);
 
   const emptyCells = []
   
@@ -141,28 +138,24 @@ function fillBoard(state) {
 function newGame(state) {
   const newBoard = [...createEmptyBoard()];
   
-  const random1 = getRandomPair(newBoard.length);
+  const random1 = BoardUtils.getRandomPair(newBoard.length);
   let random2 = random1;
 
   while (JSON.stringify(random1) === JSON.stringify(random2)) {
-    random2 = getRandomPair(newBoard.length);
+    random2 = BoardUtils.getRandomPair(newBoard.length);
   }
 
   newBoard[random1[0]][random1[1]] = createCell(2, true);
   newBoard[random2[0]][random2[1]] = createCell(2, true);
   
   return newBoard;
-} 
-
-function getRandomPair(max = 4) {
-  return [
-    Math.floor(Math.random() * max), Math.floor(Math.random() * max)];
 }
 
 export default function (state = initialState, action) {
   if (action.type === 'MOVE') {
     return {
       ...state,
+      moving: false,
       last_move: action.direction,
       prev_board: [
         ...state.board
@@ -176,6 +169,9 @@ export default function (state = initialState, action) {
   if (action.type === 'FILL') {
     return {
       ...state,
+      prev_board: [
+        ...state.board
+      ],
       board: [
         ...fillBoard(state)
       ]
@@ -200,7 +196,6 @@ export default function (state = initialState, action) {
       game_over: true,
     }
   }
-
 
   return { ...state };
 }

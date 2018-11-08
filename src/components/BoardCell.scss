@@ -4,10 +4,51 @@
   height: 82px;
   text-align: center;
   flex: 1 1 0;
-  background: #9c9c9c;
   font-size: 30px;
-
+  color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 3px;
+
+  $colors: (
+    0: #9c9c9c,
+    2: #485d68,
+    4: #2ca796,
+    8: #8e4c0c,
+    16: #ac1d7f,
+    32: #ffc605,
+    64: #009dcd,
+    128: #007541,
+    256: #f50,
+    512: #bfcc09,
+    1024: #003669,
+    2048: #f42c59,
+    default: #f42c59
+  );
+  
+  @each $number, $color in $colors {
+    &.number-#{$number} {
+      background: $color;
+    }
+  }
+}
+
+.merged-enter {
+  transform: scale(1.3);
+}
+
+.merged-enter-active {
+  transform: scale(1);
+  transition: all 300ms ease-out;
+}
+
+
+.new-enter {
+  transform: scale(0);
+}
+
+.new-enter-active {
+  transform: scale(1);
+  transition: all 300ms ease-out;
 }
