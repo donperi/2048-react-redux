@@ -34,21 +34,10 @@
   }
 }
 
-.merged-enter {
+.merged {
   transform: scale(1.3);
 }
 
-.merged-enter-active {
-  transform: scale(1);
-  transition: all 300ms ease-out;
-}
-
-
-.new-enter {
+.new {
   transform: scale(0);
-}
-
-.new-enter-active {
-  transform: scale(1);
-  transition: all 300ms ease-out;
 }

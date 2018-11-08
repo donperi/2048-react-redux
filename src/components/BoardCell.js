@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import classNames from 'classnames';
-import CSSTransition from 'react-transition-group/CSSTransition';
+import TweenLite from 'gsap';
 
 import './BoardCell.scss';
 
@@ -8,11 +8,6 @@ function BoardCell({ rowIndex, cellIndex, data }) {
   const cellRef = useRef();
   const [ cellHeight, setCellHeight ] = useState(null)
   const cell = data.board[rowIndex][cellIndex];
-  const animate = useRef(false);
-
-  useEffect(() => {
-    animate.current = true;
-  }, [cell])
 
   useEffect(() => {
     function handleResize() {
@@ -29,6 +24,15 @@ function BoardCell({ rowIndex, cellIndex, data }) {
     };
   }, [cellHeight])
 
+  useEffect(() => {
+    if (cell.merged) {
+      TweenLite.to(cellRef.current, 0.3, { transform: 'scale(1)' });
+    }
+    
+    if (cell.is_new) {
+      TweenLite.to(cellRef.current, 0.3, { transform: 'scale(1)' });
+    }
+  });
 
   const classes = classNames({
     'merged': cell.merged,
@@ -36,25 +40,17 @@ function BoardCell({ rowIndex, cellIndex, data }) {
   })
 
   return (
-    <CSSTransition 
-      in={animate.current} 
-      classNames={classes} 
-      timeout={300}
-      onEntered={() => { animate.current = false; }}
+    <div 
+      key={JSON.stringify(cell)}
+      ref={cellRef} 
+      style={{ height: cellHeight }} 
+      className={`BoardCell number-${cell.value} ${classes}`}
     >
-      {(state) => (
-        <div 
-          ref={cellRef} 
-          style={{ height: cellHeight }} 
-          className={`BoardCell number-${cell.value}`}
-        >
-        <span className={`BoardCell-value`}>
-          {cell.value !== 0 ? cell.value : null }
-        </span>
-      </div>
-      )}
-    </CSSTransition>
+    <span className={`BoardCell-value`}>
+      {cell.value !== 0 ? cell.value : null }
+    </span>
+  </div>
   )
 }
 
-export default React.memo(BoardCell);
+export default BoardCell;
